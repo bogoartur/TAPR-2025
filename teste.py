@@ -26,34 +26,42 @@ def podeAqui(coord):
 def colocaRainhas():
 
     while posAtual[0] < 8:
-        linha_valida = False
+
+        if posAtual[1] >= 8:
+            if not posicoesRainhas:
+                print("Buguei")
+                return False
+            
+            ultima = posicoesRainhas.pop()
+            tabuleiro[ultima[0]][ultima[1]] = "X"
+
+            posAtual[0] = ultima[0]
+            posAtual[1] = ultima[1] + 1
+
+            continue
+
         if podeAqui(posAtual):
             tabuleiro[posAtual[0]][posAtual[1]] = "R"
             posicoesRainhas.append(list(posAtual))
             posAtual[1] = 0
             posAtual[0] += 1
-            linha_valida = True
+            continue
 
-        else:
-            if posAtual[1] < 8:
-                posAtual[1] += 1
-    if not linha_valida:
-        if not posicoesRainhas:
-            print("Buguei")
-            return
+        else:    
+            posAtual[1] += 1
+            continue
+    if posAtual[0] == 8:
+        print("Coloquei todas as rainhas")
+        for linha in tabuleiro:
+            print(linha)
+    else:
+        pass
 
-        ultima = posicoesRainhas.pop()
-        tabuleiro[ultima[0]][ultima[1]] = "X"
-
-        posAtual[0] = ultima[0]
-        posAtual[1] = ultima[1] + 1
 
 
 colocaRainhas()
-for linha in tabuleiro:
-    print(linha)
-            
 
+            
 
 
 
