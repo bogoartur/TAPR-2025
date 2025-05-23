@@ -15,260 +15,260 @@ import py7zr
 
 seven_zip_exe = shutil.which('7z.exe')
 
-def サンプル_を_作成する(ファイル名, サイズ=1):
-    if not os.path.exists(ファイル名): #フォルダに存在しない場合のみファイルを作成します
-        最終_繰り返し = "これは圧縮用のサンプルテキストです。繰り返しは良い圧縮の鍵です。 " * 200
-        繰り返し_テキスト = "圧縮アルゴリズム用のテスト文字列 ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 !@#$%^&*()_+[];',./{}|:<>?\n"
-        行数 = (サイズ * 1024 * 1024) // len(繰り返し_テキスト.encode('utf-8'))
-        if 行数 == 0:
-            行数 = 100 
-        with open(ファイル名, "w", encoding="utf-8") as f:
-            for i in range(行数):
-                f.write(f"{i}: {繰り返し_テキスト}")
-            f.write(最終_繰り返し * (サイズ * 2)) 
+def criar_arquivo_exemplo(nome_arq, tamanho=1):
+    if not os.path.exists(nome_arq): #só cria o arquivo se não tiver um na pasta
+        repeticao_final = "Este é um exemplo de texto para compressão. Repetição é a chave para boa compressão. " * 200
+        repeticao = "Linha de teste para algoritmos de compactacao ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 !@#$%^&*()_+[];',./{}|:<>?\n"
+        qtd_linhas = (tamanho * 1024 * 1024) // len(repeticao.encode('utf-8'))
+        if qtd_linhas == 0:
+            qtd_linhas = 100 
+        with open(nome_arq, "w", encoding="utf-8") as f:
+            for i in range(qtd_linhas):
+                f.write(f"{i}: {repeticao}")
+            f.write(repeticao_final * (tamanho * 2)) 
 
-def ファイルサイズ_を_取得する(パス):
-    if os.path.exists(パス):
-        return os.path.getsize(パス)
+def tamanho_arq(caminho):
+    if os.path.exists(caminho):
+        return os.path.getsize(caminho)
     return 0
 
-def 圧縮率_を_計算する(初期_サイズ, 圧縮_サイズ):
-    if 初期_サイズ == 0:
+def calcular_taxa_compactacao(tamanho_inicial, tamanho_comprimido):
+    if tamanho_inicial == 0:
         return 0
-    return ((初期_サイズ - 圧縮_サイズ) / 初期_サイズ) * 100 #パーセント
+    return ((tamanho_inicial - tamanho_comprimido) / tamanho_inicial) * 100 #porcentagem
 
-def gzip_を_テストする(入力ファイル):
-    アルゴリズム = "GZip (DEFLATE)"
-    圧縮ファイル名 = 入力ファイル + ".圧縮済み" + ".gz"
-    解凍ファイル名 = 入力ファイル + ".解凍済み" + ".gz.txt"
-    初期_サイズ = ファイルサイズ_を_取得する(入力ファイル)
+def teste_gzip(arquivo_input):
+    algoritmo = "GZip (DEFLATE)"
+    nome_comprimido = arquivo_input + ".comprimido" + ".gz"
+    nome_descomprimido = arquivo_input + ".descomprimido" + ".gz.txt"
+    tamanho_inicial = tamanho_arq(arquivo_input)
     
-    開始時間 = time.perf_counter()
-    with open(入力ファイル, "rb") as f_in, gzip.open(圧縮ファイル名, "wb") as f_out:
+    tempo_ini = time.perf_counter()
+    with open(arquivo_input, "rb") as f_in, gzip.open(nome_comprimido, "wb") as f_out:
         shutil.copyfileobj(f_in, f_out)
-    圧縮時間 = time.perf_counter() - 開始時間
-    圧縮_サイズ = ファイルサイズ_を_取得する(圧縮ファイル名)
+    tempo_comprimir = time.perf_counter() - tempo_ini
+    tamanho_comprimido = tamanho_arq(nome_comprimido)
 
-    開始時間 = time.perf_counter()
-    with gzip.open(圧縮ファイル名, "rb") as f_in, open(解凍ファイル名, "wb") as f_out:
+    tempo_ini = time.perf_counter()
+    with gzip.open(nome_comprimido, "rb") as f_in, open(nome_descomprimido, "wb") as f_out:
         shutil.copyfileobj(f_in, f_out)
-    解凍時間 = time.perf_counter() - 開始時間
+    tempo_descomprimir = time.perf_counter() - tempo_ini
     
-    return アルゴリズム, 圧縮時間, 解凍時間, 初期_サイズ, 圧縮_サイズ
+    return algoritmo, tempo_comprimir, tempo_descomprimir, tamanho_inicial, tamanho_comprimido
 
-def bzip2_を_テストする(入力ファイル):
-    アルゴリズム = "BZip2 (Burrows-Wheeler)"
-    圧縮ファイル名 = 入力ファイル + ".圧縮済み" + ".bz2"
-    解凍ファイル名 = 入力ファイル + ".解凍済み" + ".bz2.txt"
-    初期_サイズ = ファイルサイズ_を_取得する(入力ファイル)
+def teste_bzip2(arquivo_input):
+    algoritmo = "BZip2 (Burrows-Wheeler)"
+    nome_comprimido = arquivo_input + ".comprimido" + ".bz2"
+    nome_descomprimido = arquivo_input + ".descomprimido" + ".bz2.txt"
+    tamanho_inicial = tamanho_arq(arquivo_input)
 
-    開始時間 = time.perf_counter()
-    with open(入力ファイル, "rb") as f_in, bz2.open(圧縮ファイル名, "wb") as f_out:
+    tempo_ini = time.perf_counter()
+    with open(arquivo_input, "rb") as f_in, bz2.open(nome_comprimido, "wb") as f_out:
         shutil.copyfileobj(f_in, f_out)
-    圧縮時間 = time.perf_counter() - 開始時間
-    圧縮_サイズ = ファイルサイズ_を_取得する(圧縮ファイル名)
+    tempo_comprimir = time.perf_counter() - tempo_ini
+    tamanho_comprimido = tamanho_arq(nome_comprimido)
 
-    開始時間 = time.perf_counter()
-    with bz2.open(圧縮ファイル名, "rb") as f_in, open(解凍ファイル名, "wb") as f_out:
+    tempo_ini = time.perf_counter()
+    with bz2.open(nome_comprimido, "rb") as f_in, open(nome_descomprimido, "wb") as f_out:
         shutil.copyfileobj(f_in, f_out)
-    解凍時間 = time.perf_counter() - 開始時間
+    tempo_descomprimir = time.perf_counter() - tempo_ini
 
-    return アルゴリズム, 圧縮時間, 解凍時間, 初期_サイズ, 圧縮_サイズ
+    return algoritmo, tempo_comprimir, tempo_descomprimir, tamanho_inicial, tamanho_comprimido
 
-def xz_lzma2_を_テストする(入力ファイル):
-    アルゴリズム = "Xz (LZMA2)"
-    圧縮ファイル名 = 入力ファイル + ".圧縮済み" + ".xz"
-    解凍ファイル名 = 入力ファイル + ".解凍済み" + ".xz.txt"
-    初期_サイズ = ファイルサイズ_を_取得する(入力ファイル)
+def teste_xz_lzma2(arquivo_input):
+    algoritmo = "Xz (LZMA2)"
+    nome_comprimido = arquivo_input + ".comprimido" + ".xz"
+    nome_descomprimido = arquivo_input + ".descomprimido" + ".xz.txt"
+    tamanho_inicial = tamanho_arq(arquivo_input)
 
-    開始時間 = time.perf_counter()
-    with open(入力ファイル, "rb") as f_in, lzma.open(圧縮ファイル名, "wb", format=lzma.FORMAT_XZ, preset=6) as f_out:
+    tempo_ini = time.perf_counter()
+    with open(arquivo_input, "rb") as f_in, lzma.open(nome_comprimido, "wb", format=lzma.FORMAT_XZ, preset=6) as f_out:
         shutil.copyfileobj(f_in, f_out)
-    圧縮時間 = time.perf_counter() - 開始時間
-    圧縮_サイズ = ファイルサイズ_を_取得する(圧縮ファイル名)
+    tempo_comprimir = time.perf_counter() - tempo_ini
+    tamanho_comprimido = tamanho_arq(nome_comprimido)
 
-    開始時間 = time.perf_counter()
-    with lzma.open(圧縮ファイル名, "rb", format=lzma.FORMAT_XZ) as f_in, open(解凍ファイル名, "wb") as f_out:
+    tempo_ini = time.perf_counter()
+    with lzma.open(nome_comprimido, "rb", format=lzma.FORMAT_XZ) as f_in, open(nome_descomprimido, "wb") as f_out:
         shutil.copyfileobj(f_in, f_out)
-    解凍時間 = time.perf_counter() - 開始時間
+    tempo_descomprimir = time.perf_counter() - tempo_ini
         
-    return アルゴリズム, 圧縮時間, 解凍時間, 初期_サイズ, 圧縮_サイズ
+    return algoritmo, tempo_comprimir, tempo_descomprimir, tamanho_inicial, tamanho_comprimido
 
-def 7zip_lzma2_py7zr_を_テストする(入力ファイル):
-    アルゴリズム = "7-zip (LZMA2 via py7zr)"
-    圧縮ファイル名 = 入力ファイル + ".圧縮済み" + ".7z"
-    解凍フォルダ = 入力ファイル + ".解凍済み" + "_7z"
-    初期_サイズ = ファイルサイズ_を_取得する(入力ファイル)
+def teste_7zip_lzma2_py7zr(arquivo_input):
+    algoritmo = "7-zip (LZMA2 via py7zr)"
+    nome_comprimido = arquivo_input + ".comprimido" + ".7z"
+    pasta_descomp = arquivo_input + ".descomprimido" + "_7z"
+    tamanho_inicial = tamanho_arq(arquivo_input)
     
-    lzma_フィルター = [{'id': py7zr.FILTER_LZMA2, 'preset': 5}] 
+    filtros_lzma = [{'id': py7zr.FILTER_LZMA2, 'preset': 5}] 
 
-    開始時間 = time.perf_counter()
-    with py7zr.SevenZipFile(圧縮ファイル名, 'w', filters=lzma_フィルター) as ファイル:
-        ファイル.write(入力ファイル, arcname=os.path.basename(入力ファイル))
-    圧縮時間 = time.perf_counter() - 開始時間
-    圧縮_サイズ = ファイルサイズ_を_取得する(圧縮ファイル名)
+    tempo_ini = time.perf_counter()
+    with py7zr.SevenZipFile(nome_comprimido, 'w', filters=filtros_lzma) as arquivo:
+        arquivo.write(arquivo_input, arcname=os.path.basename(arquivo_input))
+    tempo_comprimir = time.perf_counter() - tempo_ini
+    tamanho_comprimido = tamanho_arq(nome_comprimido)
 
-    開始時間 = time.perf_counter()
-    os.makedirs(解凍フォルダ, exist_ok=True)
-    with py7zr.SevenZipFile(圧縮ファイル名, 'r') as ファイル:
-        ファイル.extractall(path=解凍フォルダ)
-    解凍時間 = time.perf_counter() - 開始時間
+    tempo_ini = time.perf_counter()
+    os.makedirs(pasta_descomp, exist_ok=True)
+    with py7zr.SevenZipFile(nome_comprimido, 'r') as arquivo:
+        arquivo.extractall(path=pasta_descomp)
+    tempo_descomprimir = time.perf_counter() - tempo_ini
 
-    if os.path.exists(解凍フォルダ):
-        shutil.rmtree(解凍フォルダ)
+    if os.path.exists(pasta_descomp):
+        shutil.rmtree(pasta_descomp)
         
-    return アルゴリズム, 圧縮時間, 解凍時間, 初期_サイズ, 圧縮_サイズ
+    return algoritmo, tempo_comprimir, tempo_descomprimir, tamanho_inicial, tamanho_comprimido
 
 
-def brotli_を_テストする(入力ファイル):
-    アルゴリズム = "Brotli (BROTLI)"
-    圧縮ファイル名 = 入力ファイル + ".圧縮済み" + ".br"
-    解凍ファイル名 = 入力ファイル + ".解凍済み" + ".br.txt"
-    初期_サイズ = ファイルサイズ_を_取得する(入力ファイル)
+def teste_brotli(arquivo_input):
+    algoritmo = "Brotli (BROTLI)"
+    nome_comprimido = arquivo_input + ".comprimido" + ".br"
+    nome_descomprimido = arquivo_input + ".descomprimido" + ".br.txt"
+    tamanho_inicial = tamanho_arq(arquivo_input)
 
-    開始時間 = time.perf_counter()
-    with open(入力ファイル, "rb") as f_in:
-        データ = f_in.read()
-    データ_圧縮 = brotli.compress(データ, quality=6)
-    with open(圧縮ファイル名, "wb") as f_out:
-        f_out.write(データ_圧縮)
-    圧縮時間 = time.perf_counter() - 開始時間
-    圧縮_サイズ = ファイルサイズ_を_取得する(圧縮ファイル名)
+    tempo_ini = time.perf_counter()
+    with open(arquivo_input, "rb") as f_in:
+        dados = f_in.read()
+    dados_comp = brotli.compress(dados, quality=6)
+    with open(nome_comprimido, "wb") as f_out:
+        f_out.write(dados_comp)
+    tempo_comprimir = time.perf_counter() - tempo_ini
+    tamanho_comprimido = tamanho_arq(nome_comprimido)
 
-    開始時間 = time.perf_counter()
-    with open(圧縮ファイル名, "rb") as f_in:
-        データ_圧縮 = f_in.read()
-    データ_解凍 = brotli.decompress(データ_圧縮)
-    with open(解凍ファイル名, "wb") as f_out:
-        f_out.write(データ_解凍)
-    解凍時間 = time.perf_counter() - 開始時間
+    tempo_ini = time.perf_counter()
+    with open(nome_comprimido, "rb") as f_in:
+        dados_comp = f_in.read()
+    dados_descomp = brotli.decompress(dados_comp)
+    with open(nome_descomprimido, "wb") as f_out:
+        f_out.write(dados_descomp)
+    tempo_descomprimir = time.perf_counter() - tempo_ini
 
-    return アルゴリズム, 圧縮時間, 解凍時間, 初期_サイズ, 圧縮_サイズ
+    return algoritmo, tempo_comprimir, tempo_descomprimir, tamanho_inicial, tamanho_comprimido
 
-def lz4_を_テストする(入力ファイル):
-    アルゴリズム = "LZ4 (LZ4)"
-    圧縮ファイル名 = 入力ファイル + ".圧縮済み" + ".lz4"
-    解凍ファイル名 = 入力ファイル + ".解凍済み" + ".lz4.txt"
-    初期_サイズ = ファイルサイズ_を_取得する(入力ファイル)
+def teste_lz4(arquivo_input):
+    algoritmo = "LZ4 (LZ4)"
+    nome_comprimido = arquivo_input + ".comprimido" + ".lz4"
+    nome_descomprimido = arquivo_input + ".descomprimido" + ".lz4.txt"
+    tamanho_inicial = tamanho_arq(arquivo_input)
 
-    開始時間 = time.perf_counter()
-    with open(入力ファイル, "rb") as f_in, lz4.frame.open(圧縮ファイル名, "wb") as f_out:
+    tempo_ini = time.perf_counter()
+    with open(arquivo_input, "rb") as f_in, lz4.frame.open(nome_comprimido, "wb") as f_out:
         shutil.copyfileobj(f_in, f_out)
-    圧縮時間 = time.perf_counter() - 開始時間
-    圧縮_サイズ = ファイルサイズ_を_取得する(圧縮ファイル名)
+    tempo_comprimir = time.perf_counter() - tempo_ini
+    tamanho_comprimido = tamanho_arq(nome_comprimido)
 
-    開始時間 = time.perf_counter()
-    with lz4.frame.open(圧縮ファイル名, "rb") as f_in, open(解凍ファイル名, "wb") as f_out:
+    tempo_ini = time.perf_counter()
+    with lz4.frame.open(nome_comprimido, "rb") as f_in, open(nome_descomprimido, "wb") as f_out:
         shutil.copyfileobj(f_in, f_out)
-    解凍時間 = time.perf_counter() - 開始時間
+    tempo_descomprimir = time.perf_counter() - tempo_ini
 
-    return アルゴリズム, 圧縮時間, 解凍時間, 初期_サイズ, 圧縮_サイズ
+    return algoritmo, tempo_comprimir, tempo_descomprimir, tamanho_inicial, tamanho_comprimido
 
-def snappy_を_テストする(入力ファイル):
-    アルゴリズム = "Snappy (LZ77)"
-    圧縮ファイル名 = 入力ファイル + ".圧縮済み" + ".snappy"
-    解凍ファイル名 = 入力ファイル + ".解凍済み" + ".snappy.txt"
-    初期_サイズ = ファイルサイズ_を_取得する(入力ファイル)
+def teste_snappy(arquivo_input):
+    algoritmo = "Snappy (LZ77)"
+    nome_comprimido = arquivo_input + ".comprimido" + ".snappy"
+    nome_descomprimido = arquivo_input + ".descomprimido" + ".snappy.txt"
+    tamanho_inicial = tamanho_arq(arquivo_input)
 
-    開始時間 = time.perf_counter()
-    with open(入力ファイル, "rb") as f_in:
-        データ = f_in.read()
-    データ_圧縮 = snappy.compress(データ)
-    with open(圧縮ファイル名, "wb") as f_out:
-        f_out.write(データ_圧縮)
-    圧縮時間 = time.perf_counter() - 開始時間
-    圧縮_サイズ = ファイルサイズ_を_取得する(圧縮ファイル名)
+    tempo_ini = time.perf_counter()
+    with open(arquivo_input, "rb") as f_in:
+        dados = f_in.read()
+    dados_comp = snappy.compress(dados)
+    with open(nome_comprimido, "wb") as f_out:
+        f_out.write(dados_comp)
+    tempo_comprimir = time.perf_counter() - tempo_ini
+    tamanho_comprimido = tamanho_arq(nome_comprimido)
 
-    開始時間 = time.perf_counter()
-    with open(圧縮ファイル名, "rb") as f_in:
-        データ_圧縮 = f_in.read()
-    データ_解凍 = snappy.decompress(データ_圧縮)
-    with open(解凍ファイル名, "wb") as f_out:
-        f_out.write(データ_解凍)
-    解凍時間 = time.perf_counter() - 開始時間
+    tempo_ini = time.perf_counter()
+    with open(nome_comprimido, "rb") as f_in:
+        dados_comp = f_in.read()
+    dados_descomp = snappy.decompress(dados_comp)
+    with open(nome_descomprimido, "wb") as f_out:
+        f_out.write(dados_descomp)
+    tempo_descomprimir = time.perf_counter() - tempo_ini
 
-    return アルゴリズム, 圧縮時間, 解凍時間, 初期_サイズ, 圧縮_サイズ
+    return algoritmo, tempo_comprimir, tempo_descomprimir, tamanho_inicial, tamanho_comprimido
 
-def zstd_を_テストする(入力ファイル):
-    アルゴリズム = "Zstd (ZSTD)"
-    圧縮ファイル名 = 入力ファイル + ".圧縮済み" + ".zst"
-    解凍ファイル名 = 入力ファイル + ".解凍済み" + ".zst.txt"
-    初期_サイズ = ファイルサイズ_を_取得する(入力ファイル)
+def teste_zstd(arquivo_input):
+    algoritmo = "Zstd (ZSTD)"
+    nome_comprimido = arquivo_input + ".comprimido" + ".zst"
+    nome_descomprimido = arquivo_input + ".descomprimido" + ".zst.txt"
+    tamanho_inicial = tamanho_arq(arquivo_input)
     
     cctx = zstandard.ZstdCompressor(level=3) 
     dctx = zstandard.ZstdDecompressor()
 
-    開始時間 = time.perf_counter()
-    with open(入力ファイル, "rb") as f_in, open(圧縮ファイル名, "wb") as f_out:
-        データ = f_in.read()
-        データ_圧縮 = cctx.compress(データ)
-        f_out.write(データ_圧縮)
-    圧縮時間 = time.perf_counter() - 開始時間
-    圧縮_サイズ = ファイルサイズ_を_取得する(圧縮ファイル名)
+    tempo_ini = time.perf_counter()
+    with open(arquivo_input, "rb") as f_in, open(nome_comprimido, "wb") as f_out:
+        dados = f_in.read()
+        dados_comp = cctx.compress(dados)
+        f_out.write(dados_comp)
+    tempo_comprimir = time.perf_counter() - tempo_ini
+    tamanho_comprimido = tamanho_arq(nome_comprimido)
 
-    開始時間 = time.perf_counter()
-    with open(圧縮ファイル名, "rb") as f_in, open(解凍ファイル名, "wb") as f_out:
-        データ_圧縮 = f_in.read()
-        データ_解凍 = dctx.decompress(データ_圧縮)
-        f_out.write(データ_解凍)
-    解凍時間 = time.perf_counter() - 開始時間
+    tempo_ini = time.perf_counter()
+    with open(nome_comprimido, "rb") as f_in, open(nome_descomprimido, "wb") as f_out:
+        dados_comp = f_in.read()
+        dados_descomp = dctx.decompress(dados_comp)
+        f_out.write(dados_descomp)
+    tempo_descomprimir = time.perf_counter() - tempo_ini
 
-    return アルゴリズム, 圧縮時間, 解凍時間, 初期_サイズ, 圧縮_サイズ
+    return algoritmo, tempo_comprimir, tempo_descomprimir, tamanho_inicial, tamanho_comprimido
 
 if __name__ == "__main__":
-    サンプル_を_作成する("arquivo_teste.txt", サイズ=int(input("MBでテストファイルのサイズの数字を入力してください"))) #メガバイトで
+    criar_arquivo_exemplo("arquivo_teste.txt", tamanho=int(input("Digite um número para o tamanho do arquivo teste em MB"))) #em megabytes
 
-    アルゴリズム_リスト = [
-        gzip_を_テストする,
-        bzip2_を_テストする,
-        xz_lzma2_を_テストする,
-        7zip_lzma2_py7zr_を_テストする,
-        brotli_を_テストする,
-        lz4_を_テストする,
-        snappy_を_テストする,
-        zstd_を_テストする,
+    lista_algoritmos = [
+        teste_gzip,
+        teste_bzip2,
+        teste_xz_lzma2,
+        teste_7zip_lzma2_py7zr,
+        teste_brotli,
+        teste_lz4,
+        teste_snappy,
+        teste_zstd,
     ]
 
-    結果 = []
+    resultados = []
 
-    print("\n圧縮テストの開始...\n")
-    for テスト関数 in アルゴリズム_リスト:
-        ベース_圧縮 = "arquivo_teste.txt" + ".圧縮済み" 
-        ベース_解凍 = "arquivo_teste.txt" + ".解凍済み"
+    print("\nIniciando testes de compactação...\n")
+    for teste_func in lista_algoritmos:
+        base_comp = "arquivo_teste.txt" + ".comprimido" 
+        base_descomp = "arquivo_teste.txt" + ".descomprimido"
         
-        for 項目 in os.listdir('.'):
-            if 項目.startswith(ベース_圧縮.split('/')[-1]) or 項目.startswith(ベース_解凍.split('/')[-1]):
-                if os.path.isdir(項目): 
-                    shutil.rmtree(項目)
+        for item in os.listdir('.'):
+            if item.startswith(base_comp.split('/')[-1]) or item.startswith(base_descomp.split('/')[-1]):
+                if os.path.isdir(item): 
+                    shutil.rmtree(item)
 
-        print(f"{テスト関数.__name__.replace('_を_テストする', '').upper()}のテスト...")
-        名前, 圧縮_t, 解凍_t, 初期_s, 圧縮_s = テスト関数("arquivo_teste.txt")
-        結果.append((名前, 圧縮_t, 解凍_t, 初期_s, 圧縮_s))
+        print(f"Testando {teste_func.__name__.replace('teste_', '').upper()}...")
+        nome, comp_t, decomp_t, orig_s, comp_s = teste_func("arquivo_teste.txt")
+        resultados.append((nome, comp_t, decomp_t, orig_s, comp_s))
         
-        比率 = 圧縮率_を_計算する(初期_s, 圧縮_s)
-        print(f"  圧縮時間: {圧縮_t:.4f}秒")
-        print(f"  解凍時間: {解凍_t:.4f}秒")
-        print(f"  オリジナルサイズ: {初期_s / (1024*1024):.2f} MB")
-        print(f"  圧縮サイズ: {圧縮_s / (1024*1024):.2f} MB")
-        print(f"  圧縮率: {比率:.2f}%")
+        ratio = calcular_taxa_compactacao(orig_s, comp_s)
+        print(f"  Tempo de Compactação: {comp_t:.4f}s")
+        print(f"  Tempo de Descompactação: {decomp_t:.4f}s")
+        print(f"  Tamanho Original: {orig_s / (1024*1024):.2f} MB")
+        print(f"  Tamanho Compactado: {comp_s / (1024*1024):.2f} MB")
+        print(f"  Taxa de Compactação: {ratio:.2f}%")
         print("-" * 30)
 
-    print("\n--- 最終結果 ---")
-    print(f"{'アルゴリズム':<30} | {'圧縮時間 (秒)':<15} | {'解凍時間 (秒)':<18} | {'オリジナルサイズ (MB)':<19} | {'圧縮サイズ (MB)':<15} | {'圧縮率 (%)':<10}")
+    print("\n--- Resultados Finais ---")
+    print(f"{'Algoritmo':<30} | {'Tempo compr (s)':<15} | {'Tempo descomp (s)':<18} | {'Tamanho original (MB)':<19} | {'Tamanho compr (MB)':<15} | {'Taxa (%)':<10}")
     print("-" * 120)
 
-    def ソートキー(結果):
-        名前, 圧縮_t, 解凍_t, 初期_s, 圧縮_s = 結果
-        比率 = 圧縮率_を_計算する(初期_s, 圧縮_s)
-        return (-比率, 圧縮_t) 
+    def ordenador(res):
+        nome, comp_t, decomp_t, orig_s, comp_s = res
+        ratio = calcular_taxa_compactacao(orig_s, comp_s)
+        return (-ratio, comp_t) 
 
-    結果.sort(key=ソートキー)
+    resultados.sort(key=ordenador)
 
-    for 名前, 圧縮_時間, 解凍_時間, 初期_サイズ, 圧縮_サイズ in 結果:
-        mb_オリジナル = f"{初期_サイズ / (1024*1024):.2f}"
-        時間_圧縮 = f"{圧縮_時間:.4f}"
-        時間_解凍 = f"{解凍_時間:.4f}"
-        mb_圧縮 = f"{圧縮_サイズ / (1024*1024):.2f}"
-        比率_圧縮 = f"{圧縮率_を_計算する(初期_サイズ, 圧縮_サイズ):.2f}"
+    for nome, tempo_comprimir, tempo_descomprimir, tamanho_inicial, tamanho_comprimido in resultados:
+        mb_original = f"{tamanho_inicial / (1024*1024):.2f}"
+        tempo_compr = f"{tempo_comprimir:.4f}"
+        tempo_descompr = f"{tempo_descomprimir:.4f}"
+        mb_compr = f"{tamanho_comprimido / (1024*1024):.2f}"
+        taxa_comp = f"{calcular_taxa_compactacao(tamanho_inicial, tamanho_comprimido):.2f}"
 
-        print(f"{名前:<30} | {時間_圧縮:<15} | {時間_解凍:<18} | {mb_オリジナル:<19} | {mb_圧縮:<15} | {比率_圧縮:<10}")
+        print(f"{nome:<30} | {tempo_compr:<15} | {tempo_descompr:<18} | {mb_original:<19} | {mb_compr:<15} | {taxa_comp:<10}")
